@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { userModel } from "../models/userModel.js";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 export const register = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -33,15 +34,17 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
         await newUser.save();
 
+        const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET || "fallback_secret", { expiresIn: "1d" });
+
         // 4. Return success response
         res.status(201).json({
             message: "User registered successfully",
+            token,
             user: {
                 id: newUser._id,
                 firstName: newUser.firstName,
                 lastName: newUser.lastName,
-                email: newUser.email,
-                password:newUser.password
+                email: newUser.email
             }
         });
     } catch (error) {
@@ -74,10 +77,17 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
         const isPasswordCorrect = await bcrypt.compare(password, existingUser.password);
 
-     
+        if (!isPasswordCorrect) {
+            res.status(400).json({ message: "Invalid Email or Password" });
+            return;
+        }
+
+        const token = jwt.sign({id:existingUser._id}, process.env.JWT_SECRET || "fallback_secret", { expiresIn: "1d" })
+
         // 4. Return success response
-        res.status(201).json({
-            message: "User registered successfully",
+        res.status(200).json({
+            message: "User logged in successfully",
+            token,
             user: {
                 id: existingUser._id,
                 firstName: existingUser.firstName,
