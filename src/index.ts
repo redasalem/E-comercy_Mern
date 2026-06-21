@@ -2,6 +2,7 @@ import exprss from "express";
 import mongoose from "mongoose";
 import userRoute from './routes/userRoute.js';
 import productRoute from './routes/productRoute.js';
+import cartRoute from './routes/cartRoute.js';
 
 const app = exprss();
 
@@ -24,6 +25,8 @@ mongoose.connect(process.env.MONGO_URL || "mongodb://localhost:27017/ecommerce")
 app.use("/user",userRoute);
 
 app.use("/products",productRoute);
+
+app.use('/cart',cartRoute)
 
 
 app.listen(PORT, () => {
