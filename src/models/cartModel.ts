@@ -11,8 +11,6 @@ export interface IcartItem extends Document{
     quantity:number;
 
 }
-
-
 export interface Icart extends Document{
     userId:string | ObjectId;
     items:IcartItem[];
